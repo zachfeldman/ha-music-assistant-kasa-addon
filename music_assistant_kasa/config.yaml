@@ -1,0 +1,46 @@
+name: Music Assistant (Kasa Lights Sync test)
+version: "2.10.4-kasa1"
+slug: music_assistant_kasa
+description: >-
+  TEMPORARY test build of Music Assistant 2.10.4 with the kasa-lights-sync
+  plugin (https://github.com/zachfeldman/kasa-lights-sync) baked in via
+  music-assistant-plugin-manager. Used to verify real-time Kasa light sync
+  against the garage speaker before deciding whether to run this long-term.
+  Same data/config shape as the official Music Assistant app, but this
+  install starts with its own empty /data - it does not share state with
+  the official app.
+url: https://github.com/zachfeldman/ha-music-assistant-kasa-addon
+arch:
+  - amd64
+  - aarch64
+homeassistant_api: true
+hassio_api: true
+hassio_role: manager
+discovery:
+  - music_assistant
+auth_api: true
+host_network: true
+ingress: true
+ingress_port: 8094
+audio: true
+panel_icon: mdi:music-assistant
+panel_title: MA (Kasa test)
+panel_admin: false
+uart: false
+apparmor: true
+map:
+  - media:rw
+  - ssl:ro
+init: false
+stage: experimental
+tmpfs: true
+backup_exclude:
+  - cache.db
+  - collage_images/*
+  - .cache/*
+options:
+  log_level: info
+  safe_mode: false
+schema:
+  log_level: list(debug|info|warning|error)
+  safe_mode: bool
