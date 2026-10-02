@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile:1
 #
-# Music Assistant 2.10.4, stock, plus kasa-lights-sync loaded via
+# Music Assistant 2.10.4, stock, plus ha-lights-sync loaded via
 # music-assistant-plugin-manager's entrypoint discovery (no changes to
 # Music Assistant's own source tree - see that project's README for why).
 # Launch command swaps `mass` for `python -m music_assistant_plugin_manager`,
 # which patches provider discovery then calls straight into Music
 # Assistant's own main() - same args, same behavior otherwise. See
-# https://github.com/zachfeldman/kasa-lights-sync for the plugin itself and
+# https://github.com/zachfeldman/ha-lights-sync for the plugin itself and
 # https://github.com/TigreGotico/music-assistant-plugin-manager for the
 # loader this depends on.
 FROM ghcr.io/music-assistant/server:2.10.4
@@ -18,9 +18,9 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# kasa-lights-sync isn't published to PyPI yet (still in active development -
+# ha-lights-sync isn't published to PyPI yet (still in active development -
 # see its own repo's Status note), so install it straight from GitHub. Once
-# it's published this can switch to a plain `kasa-lights-sync` pin.
+# it's published this can switch to a plain `ha-lights-sync` pin.
 #
 # `--python $VIRTUAL_ENV/bin/python` matters: plain `pip install` here installs
 # into the SYSTEM Python, not $VIRTUAL_ENV (the venv the base image actually
@@ -30,7 +30,7 @@ RUN apt-get update \
 # server never sees. Caught this on the first real deploy: `mass` started but
 # immediately failed with "No module named music_assistant_plugin_manager".
 RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
-    "kasa-lights-sync @ git+https://github.com/zachfeldman/kasa-lights-sync.git" \
+    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread

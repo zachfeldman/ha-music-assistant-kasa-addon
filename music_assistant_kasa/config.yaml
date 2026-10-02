@@ -1,14 +1,17 @@
-name: Music Assistant (Kasa Lights Sync test)
-version: "2.10.4-kasa1"
+name: Music Assistant (HA Lights Sync test)
+version: "2.10.4-kasa2"
 slug: music_assistant_kasa
 description: >-
-  TEMPORARY test build of Music Assistant 2.10.4 with the kasa-lights-sync
-  plugin (https://github.com/zachfeldman/kasa-lights-sync) baked in via
-  music-assistant-plugin-manager. Used to verify real-time Kasa light sync
+  TEMPORARY test build of Music Assistant 2.10.4 with the ha-lights-sync
+  plugin (https://github.com/zachfeldman/ha-lights-sync, formerly
+  kasa-lights-sync - renamed once it stopped being Kasa-specific) baked in
+  via music-assistant-plugin-manager. Used to verify real-time light sync
   against the garage speaker before deciding whether to run this long-term.
   Same data/config shape as the official Music Assistant app, but this
   install starts with its own empty /data - it does not share state with
-  the official app.
+  the official app. Slug is unchanged from the kasa-lights-sync test build
+  on purpose, so this rebuild keeps the Spotify login/players already set
+  up on it rather than starting over.
 url: https://github.com/zachfeldman/ha-music-assistant-kasa-addon
 arch:
   - amd64
