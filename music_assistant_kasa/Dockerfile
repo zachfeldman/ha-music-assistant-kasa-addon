@@ -21,7 +21,15 @@ RUN apt-get update \
 # kasa-lights-sync isn't published to PyPI yet (still in active development -
 # see its own repo's Status note), so install it straight from GitHub. Once
 # it's published this can switch to a plain `kasa-lights-sync` pin.
-RUN pip install --no-cache-dir \
+#
+# `--python $VIRTUAL_ENV/bin/python` matters: plain `pip install` here installs
+# into the SYSTEM Python, not $VIRTUAL_ENV (the venv the base image actually
+# runs from and that `mass`/our entrypoint invoke) - the venv has no `pip`
+# binary of its own (the base image's builder stage populates it with `uv`,
+# not pip), so a bare `pip install` silently lands somewhere the running
+# server never sees. Caught this on the first real deploy: `mass` started but
+# immediately failed with "No module named music_assistant_plugin_manager".
+RUN pip install --no-cache-dir --python "$VIRTUAL_ENV/bin/python" \
     "kasa-lights-sync @ git+https://github.com/zachfeldman/kasa-lights-sync.git" \
     music-assistant-plugin-manager
 
