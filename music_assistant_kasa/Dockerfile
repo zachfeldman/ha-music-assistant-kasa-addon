@@ -29,7 +29,7 @@ RUN apt-get update \
 # not pip), so a bare `pip install` silently lands somewhere the running
 # server never sees. Caught this on the first real deploy: `mass` started but
 # immediately failed with "No module named music_assistant_plugin_manager".
-RUN pip install --no-cache-dir --python "$VIRTUAL_ENV/bin/python" \
+RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
     "kasa-lights-sync @ git+https://github.com/zachfeldman/kasa-lights-sync.git" \
     music-assistant-plugin-manager
 
