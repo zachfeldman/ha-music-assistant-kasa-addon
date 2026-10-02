@@ -11,8 +11,18 @@
 # loader this depends on.
 FROM ghcr.io/music-assistant/server:2.10.4
 
+# pip's git+https installer needs the `git` binary; the final server image
+# doesn't carry one (git only lives in its disposable builder stage).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# kasa-lights-sync isn't published to PyPI yet (still in active development -
+# see its own repo's Status note), so install it straight from GitHub. Once
+# it's published this can switch to a plain `kasa-lights-sync` pin.
 RUN pip install --no-cache-dir \
-    kasa-lights-sync \
+    "kasa-lights-sync @ git+https://github.com/zachfeldman/kasa-lights-sync.git" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread
