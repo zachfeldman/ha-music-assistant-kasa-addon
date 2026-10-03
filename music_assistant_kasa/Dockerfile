@@ -22,6 +22,13 @@ RUN apt-get update \
 # see its own repo's Status note), so install it straight from GitHub. Once
 # it's published this can switch to a plain `ha-lights-sync` pin.
 #
+# Pinned to a commit (not a floating branch) for two reasons: reproducible
+# builds, and because `RUN pip install ...@git+https://...` caches by the
+# *command text*, not the remote repo's current content - a plain branch
+# URL across two builds can silently serve yesterday's code from Docker's
+# layer cache. Bump this SHA (from the ha-lights-sync repo) to pick up new
+# commits; a `rebuild` alone will not.
+#
 # `--python $VIRTUAL_ENV/bin/python` matters: plain `pip install` here installs
 # into the SYSTEM Python, not $VIRTUAL_ENV (the venv the base image actually
 # runs from and that `mass`/our entrypoint invoke) - the venv has no `pip`
@@ -30,7 +37,7 @@ RUN apt-get update \
 # server never sees. Caught this on the first real deploy: `mass` started but
 # immediately failed with "No module named music_assistant_plugin_manager".
 RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
-    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git" \
+    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@758ac5cfe8040fdf186d1efb37931ae0afa1f423" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread
