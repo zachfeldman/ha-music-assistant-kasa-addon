@@ -12,21 +12,14 @@
 #
 # This is the PERMANENT replacement for the official "Music Assistant" app
 # (d5369777_music_assistant), not a test build (see music_assistant_kasa/
-# in this same repo for that, kept around as a rollback). Migrated from the
-# official app's real /data on 2026-10-04 via the one-time copy in
-# entrypoint.sh below, since Supervisor's backup/restore API only restores
-# an add-on's data back into an add-on with the exact same slug it was
-# backed up from (confirmed against the documented
-# /backups/{slug}/restore/partial schema - no remap/rename parameter
-# exists), and a custom-repo add-on can never acquire the official add-on's
-# slug (slugs are <sha of the registering repo URL>_<config slug>, and
-# that repo is music-assistant/home-assistant-addon, not this one).
-#
-# TODO once the migration is confirmed stable over a few days: delete the
-# "One-time migration" block in entrypoint.sh below and remove `backup:rw`
-# from config.yaml's map - neither is needed again after the first boot,
-# and there's no reason for this add-on to keep read/write access to every
-# Home Assistant backup indefinitely.
+# in this same repo for that, kept around as a rollback). Its /data started
+# as a one-time copy of the official app's own real /data on 2026-10-04
+# (entrypoint.sh had a migration step for this, since removed - see git
+# history on this file/README for how and why: Supervisor's backup/restore
+# API only restores an add-on's data back into an add-on with the exact
+# same slug it was backed up from, and a custom-repo add-on can never
+# acquire the official add-on's slug). That migration is done and
+# confirmed stable; entrypoint.sh is back to a plain pass-through.
 #
 # Bumped 2.10.4 -> 2.10.6 (2026-10-12) to pick up upstream fixes directly in
 # the WiiM-Sendspin grouping path we hit live: a WiiM grouped with a native

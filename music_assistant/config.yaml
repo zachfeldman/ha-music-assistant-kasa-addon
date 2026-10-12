@@ -1,19 +1,18 @@
 name: Music Assistant
-version: "2.10.6-haLightsSync6"
+version: "2.10.6-haLightsSync7"
 slug: music_assistant
 description: >-
-  Music Assistant 2.10.6 with the ha-lights-sync plugin
+  Music Assistant with the ha-lights-sync plugin
   (https://github.com/zachfeldman/ha-lights-sync) baked in via
   music-assistant-plugin-manager, replacing the official Music Assistant
-  app as the permanent instance. Migrated from the official app's own
-  /data on 2026-10-04 (library, Spotify/Sendspin/Cast state, playlists,
-  settings) via a one-time copy wired into the entrypoint - see this
-  repo's README for how and why (the official app couldn't run a custom
-  plugin without this fork; Supervisor's backup/restore can't move data
-  between differently-slugged add-ons, so the migration is a direct copy
-  through the shared `backup` mount instead). The `backup:rw` map and the
-  migration step are temporary and get removed once the migration is
-  confirmed stable - see the TODO in Dockerfile.
+  app as the permanent instance. Its /data started as a one-time copy of
+  the official app's own /data on 2026-10-04 (library, Spotify/Sendspin/
+  Cast state, playlists, settings) - see this repo's README for how and
+  why (the official app couldn't run a custom plugin without this fork;
+  Supervisor's backup/restore can't move data between differently-slugged
+  add-ons, so the migration was a direct copy through the shared `backup`
+  mount instead). That migration is done and confirmed stable; nothing
+  about it is ongoing.
 url: https://github.com/zachfeldman/ha-music-assistant-kasa-addon
 arch:
   - amd64
@@ -36,7 +35,6 @@ apparmor: true
 map:
   - media:rw
   - ssl:ro
-  - backup:rw
 init: false
 stage: stable
 tmpfs: true
