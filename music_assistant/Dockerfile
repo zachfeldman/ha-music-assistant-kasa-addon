@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# Music Assistant 2.10.4, stock, plus ha-lights-sync loaded via
+# Music Assistant 2.10.6, stock, plus ha-lights-sync loaded via
 # music-assistant-plugin-manager's entrypoint discovery (no changes to
 # Music Assistant's own source tree - see that project's README for why).
 # Launch command swaps `mass` for `python -m music_assistant_plugin_manager`,
@@ -27,7 +27,26 @@
 # from config.yaml's map - neither is needed again after the first boot,
 # and there's no reason for this add-on to keep read/write access to every
 # Home Assistant backup indefinitely.
-FROM ghcr.io/music-assistant/server:2.10.4
+#
+# Bumped 2.10.4 -> 2.10.6 (2026-10-12) to pick up upstream fixes directly in
+# the WiiM-Sendspin grouping path we hit live: a WiiM grouped with a native
+# Sendspin device (via the AirPlay-Sendspin bridge) switches its own output
+# protocol correctly and plays, but the other, native-Sendspin member of the
+# group goes completely silent - confirmed with the server's own debug log
+# (set_members/protocol-grouping lines show the bridge's group gaining the
+# native client, but nothing ever addresses that client again once playback
+# starts). Candidate fixes already in 2.10.6 and not in 2.10.4: #6474 "Fix a
+# speaker group going silent when one room is powered off while another
+# joins", #6510 "Fix a play command on a synced speaker locking up during a
+# group change", #6505 same for an announcement, #6530 "Fix external
+# playback not tracked after a player leaves a Sendspin group". None of
+# those descriptions are a verbatim match for our symptom, so this bump is a
+# bet, not a confirmed fix - re-test the exact repro (group a WiiM with a
+# native Sendspin player, play, check both sides) after it deploys, and if
+# the Sendspin side is still silent, the actual bug needs a real patch
+# against music_assistant/controllers/players/protocol_linking.py and/or
+# providers/sendspin/player.py instead.
+FROM ghcr.io/music-assistant/server:2.10.6
 
 # pip's git+https installer needs the `git` binary; the final server image
 # doesn't carry one (git only lives in its disposable builder stage).

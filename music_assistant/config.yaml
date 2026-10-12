@@ -1,8 +1,8 @@
 name: Music Assistant
-version: "2.10.4-haLightsSync4"
+version: "2.10.6-haLightsSync5"
 slug: music_assistant
 description: >-
-  Music Assistant 2.10.4 with the ha-lights-sync plugin
+  Music Assistant 2.10.6 with the ha-lights-sync plugin
   (https://github.com/zachfeldman/ha-lights-sync) baked in via
   music-assistant-plugin-manager, replacing the official Music Assistant
   app as the permanent instance. Migrated from the official app's own
