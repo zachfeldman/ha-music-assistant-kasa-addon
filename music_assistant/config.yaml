@@ -48,5 +48,11 @@ options:
   log_level: info
   safe_mode: false
 schema:
-  log_level: list(debug|info|warning|error)
+  # "verbose" added locally (upstream only offers debug/info/warning/error) -
+  # Music Assistant's own --log-level accepts it (see music_assistant/__main__.py)
+  # and it's the only way to see protocol-selection decisions logged at
+  # VERBOSE_LOG_LEVEL=5, below DEBUG=10 - needed to diagnose the Sendspin
+  # grouping bug, see Dockerfile. Safe to drop back to the upstream 4 once
+  # that's resolved.
+  log_level: list(debug|info|warning|error|verbose)
   safe_mode: bool
