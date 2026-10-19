@@ -71,6 +71,19 @@ RUN apt-get update \
 # in that repo's later energetic/auto/strobe removal or render-loop
 # heartbeat logging, which weren't part of this change.
 #
+# Bumped 52a45628 -> cb500ddb (2026-10-19, same day) still on
+# add-sound-mode-control: brightness/Speed/transition style/sensitivity/
+# Lock color/locked hue/restore-on-stop become controllable from Home
+# Assistant too, via dedicated input_number/input_select/input_boolean
+# helper entities this bridge seeds and two-way syncs itself (see that
+# commit's message - Sound Mode was already spent on color_mode, and HA's
+# own music_assistant integration doesn't surface Music Assistant's
+# PlayerFeature.OPTIONS at all, so there was no media_player slot left for
+# the rest of these). Requires the garage-media dashboard's matching
+# input_number/input_select/input_boolean helpers (personal-ha-configuration
+# repo, configuration.yaml) to already exist in Home Assistant - deployed
+# there first, same day.
+#
 # `--python $VIRTUAL_ENV/bin/python` matters: plain `pip install` here installs
 # into the SYSTEM Python, not $VIRTUAL_ENV (the venv the base image actually
 # runs from and that `mass`/our entrypoint invoke) - the venv has no `pip`
@@ -79,7 +92,7 @@ RUN apt-get update \
 # server never sees. Caught this on the first real deploy: `mass` started but
 # immediately failed with "No module named music_assistant_plugin_manager".
 RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
-    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@52a456286076d72055654d69443312c14eee1078" \
+    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@cb500ddb5fbc684facbb542aafee5750fbdbf025" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread
