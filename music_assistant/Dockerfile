@@ -84,24 +84,22 @@ RUN apt-get update \
 # repo, configuration.yaml) to already exist in Home Assistant - deployed
 # there first, same day.
 #
-# Rolled BACK cb500ddb -> 52a45628 (2026-10-19, same day, ~4.5h later) as a
-# diagnostic step: right after the cb500ddb deploy, grouping
-# media_player.ha_lights_ha_lights_sync into media_player.garage_speaker
-# started failing - Music Assistant's player controller logs "Player HA
-# Lights: HA Lights Sync can not be grouped with Garage speaker"
-# (music_assistant/controllers/players/controller.py's can_group_with
-# check), both from the garage_speaker_group_ungroup_ha_lights_sync HA
-# automation's own media_player.join call and from a manual attempt in the
-# Music Assistant UI. cb500ddb's diff (bridge.py/provider.py) doesn't touch
-# player registration, Sendspin/Chromecast linking, or can_group_with at
-# all - only adds a subscribe_entities listener and HA helper-entity
-# service calls - so there's no obvious mechanism by which it should cause
-# this, but it's the only thing that changed. This rollback is to confirm
-# whether 52a45628 alone (without cb500ddb's changes) restores grouping; if
-# it does NOT, the regression is unrelated to ha-lights-sync entirely (a
-# Music Assistant / Sendspin-Chromecast bridging issue instead - see this
-# repo's prior WiiM-Sendspin grouping bug note). If it DOES, re-examine
-# cb500ddb for a real (if non-obvious) side effect before re-deploying it.
+# Rolled back cb500ddb -> 52a45628, then immediately back to cb500ddb
+# (2026-10-19, same day) after confirming the rollback did NOT fix it:
+# grouping media_player.ha_lights_ha_lights_sync into garage_speaker fails
+# identically on 52a45628 - same "Player HA Lights: HA Lights Sync can not
+# be grouped with Garage speaker" warning
+# (music_assistant/controllers/players/controller.py), reproduced via a
+# fresh manual media_player.join call ~50s after a full addon restart (not
+# a startup race - Sendspin bridges for all rooms had long finished
+# registering). This rules out cb500ddb as the cause; it's a pre-existing
+# Music Assistant / Sendspin-Chromecast grouping compatibility issue
+# unrelated to ha-lights-sync, so there was no reason to stay on the older
+# pin and lose the settings-helper feature while investigating it
+# separately. See this repo's prior WiiM-Sendspin grouping bug note for the
+# same category of issue; next step if revisited is probably a Music
+# Assistant version bump/changelog check or filing upstream, not more
+# ha-lights-sync changes.
 #
 # `--python $VIRTUAL_ENV/bin/python` matters: plain `pip install` here installs
 # into the SYSTEM Python, not $VIRTUAL_ENV (the venv the base image actually
@@ -111,7 +109,7 @@ RUN apt-get update \
 # server never sees. Caught this on the first real deploy: `mass` started but
 # immediately failed with "No module named music_assistant_plugin_manager".
 RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
-    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@52a456286076d72055654d69443312c14eee1078" \
+    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@cb500ddb5fbc684facbb542aafee5750fbdbf025" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread
