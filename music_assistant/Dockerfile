@@ -59,6 +59,18 @@ RUN apt-get update \
 # layer cache. Bump this SHA (from the ha-lights-sync repo) to pick up new
 # commits; a `rebuild` alone will not.
 #
+# Bumped 451cc885 -> 52a45628 (2026-10-19) for add-sound-mode-control:
+# color_mode becomes changeable from Home Assistant's own Sound Mode
+# selector (media_player dropdown / select_sound_mode service), not just
+# from Music Assistant's own settings page - see that commit's message in
+# the ha-lights-sync repo for how (an instance-level monkey-patch of this
+# bridge's own visualizer Player object, since this package can't modify
+# Music Assistant's own installed source). Branched from 451cc885 itself
+# (this Dockerfile's previous pin), not ha-lights-sync's later history, so
+# this bump is ONLY that one feature - it deliberately does not also pull
+# in that repo's later energetic/auto/strobe removal or render-loop
+# heartbeat logging, which weren't part of this change.
+#
 # `--python $VIRTUAL_ENV/bin/python` matters: plain `pip install` here installs
 # into the SYSTEM Python, not $VIRTUAL_ENV (the venv the base image actually
 # runs from and that `mass`/our entrypoint invoke) - the venv has no `pip`
@@ -67,7 +79,7 @@ RUN apt-get update \
 # server never sees. Caught this on the first real deploy: `mass` started but
 # immediately failed with "No module named music_assistant_plugin_manager".
 RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
-    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@451cc885784e1c297453a63e0c7fb4c6d7a81a1e" \
+    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@52a456286076d72055654d69443312c14eee1078" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread
