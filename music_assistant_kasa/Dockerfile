@@ -37,7 +37,7 @@ RUN apt-get update \
 # server never sees. Caught this on the first real deploy: `mass` started but
 # immediately failed with "No module named music_assistant_plugin_manager".
 RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
-    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@fd04c949d859aa1db702cf5a3a0d3bb12d6c871e" \
+    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@783860b7e700313e3a15f514a6287e03e876b0f9" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread
