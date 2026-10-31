@@ -101,6 +101,37 @@ RUN apt-get update \
 # Assistant version bump/changelog check or filing upstream, not more
 # ha-lights-sync changes.
 #
+# Bumped cb500ddb -> 55c68f6f (2026-10-30) off the fix-call-service-ack-wedge
+# branch, not main - main's tip (1289729) just marks the repo archived in
+# favor of a music-assistant/server fork that hasn't had a real-hardware
+# pass yet (see that fork's own commit history), so pinning here to the
+# last commit of actual plugin code plus one new fix on top, rather than
+# to the archive-notice commit itself. This single bump pulls in several
+# commits cb500ddb never had, found live against real hardware the same
+# day:
+#   - 2a427c2/2fc1951 (already on GitHub, just never deployed): cut
+#     energetic/auto/strobe color_modes (confirmed to silently freeze the
+#     render loop on real hardware, root cause not found at the time) and
+#     add render-loop heartbeat logging.
+#   - 55c68f6f (new): the real root cause of "the lights stop reacting
+#     mid-stream" - NOT a wedged call_service(), despite every earlier
+#     commit's docstrings concluding that. Debug-logged live against
+#     light.garage_led/light.workbench_led: light.turn_on calls were
+#     reaching Home Assistant and executing fine (the entities' real HA
+#     state changed color every few minutes), but hass_client's
+#     call_service() never saw the matching "result" ack come back - on a
+#     server with ~2600 HA entities worth of subscribe_entities/state
+#     traffic sharing one websocket connection, an ack can sit queued
+#     behind that volume for minutes. _dispatch_send's existing "assume
+#     stuck after 3s, cancel and resend" logic was reacting to this as if
+#     the call were wedged and firing a replacement that waited on the
+#     exact same backlog - never actually fixing anything, which is why
+#     the symptom looked identical before and after cb500ddb/2fc1951's
+#     fixes. _send_command now uses send_command_no_wait() for this one
+#     high-frequency call site, which doesn't park a Future on that ack at
+#     all. See that commit's message in the ha-lights-sync repo for the
+#     full live-reproduction evidence.
+#
 # `--python $VIRTUAL_ENV/bin/python` matters: plain `pip install` here installs
 # into the SYSTEM Python, not $VIRTUAL_ENV (the venv the base image actually
 # runs from and that `mass`/our entrypoint invoke) - the venv has no `pip`
@@ -109,7 +140,7 @@ RUN apt-get update \
 # server never sees. Caught this on the first real deploy: `mass` started but
 # immediately failed with "No module named music_assistant_plugin_manager".
 RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
-    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@cb500ddb5fbc684facbb542aafee5750fbdbf025" \
+    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@55c68f6fd485613c986b31150b3d88f11bfb9742" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread
