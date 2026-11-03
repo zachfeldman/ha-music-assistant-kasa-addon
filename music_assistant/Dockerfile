@@ -139,8 +139,40 @@ RUN apt-get update \
 # not pip), so a bare `pip install` silently lands somewhere the running
 # server never sees. Caught this on the first real deploy: `mass` started but
 # immediately failed with "No module named music_assistant_plugin_manager".
+#
+# Bumped 55c68f6f -> a0217f65 (2026-11-03), same branch, after the lights
+# froze again the night of 2026-11-02/03 despite this pin already being on
+# 55c68f6f - symptom identical to the one that commit was supposed to have
+# fixed (static color, Sendspin stream logs totally normal, zero errors).
+# Flipping this add-on's log_level to debug and restarting it to
+# investigate came back with nothing useful: not even ha-lights-sync's own
+# extensive pre-existing DEBUG_HEARTBEAT logging in bridge.py showed up.
+# Root cause of THAT: HALightGroupBridge's logger was a disconnected
+# top-level `ha_lights_sync.bridge...` logger, never actually wired to the
+# `music_assistant.*` tree this add-on's log_level option (and every other
+# provider's logging) goes through - it had been silently running at the
+# hardcoded INFO root-logger default regardless of this add-on's log_level
+# setting this entire time. Every past "enable debug, restart, reproduce"
+# investigation of this plugin was capturing nothing from its own
+# instrumentation. a0217f65 fixes that (bridge logger now childs off the
+# provider's own correctly-wired logger) and adds two concrete things so
+# the *next* recurrence is diagnosable from normal logs instead of
+# inferred from "a restart fixed it": an always-on INFO-level heartbeat
+# (ticks/sent/skipped/stuck-recovered counts, every 15s while streaming),
+# and a watchdog - independent of the render loop's own call_later chain,
+# so it can notice if that chain itself dies - that logs an ERROR and
+# restarts just this one bridge (not the whole add-on) if the render loop
+# stalls. Whether 2026-11-02/03's recurrence was this same ack-backlog bug
+# somehow still reachable after 55c68f6f, or this Supervisor fork's
+# documented "rebuild can silently reuse a stale local clone of the addon
+# repo" issue serving stale code, or something new, is NOT yet confirmed -
+# the next occurrence's heartbeat/watchdog log lines are what should
+# settle it. See a0217f65's own commit message in the ha-lights-sync repo,
+# and that repo's README "Known limitations" section, for the full
+# writeup.
+#
 RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
-    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@55c68f6fd485613c986b31150b3d88f11bfb9742" \
+    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@a0217f6520cb85bd1fb834487314d5ee765a3039" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread
