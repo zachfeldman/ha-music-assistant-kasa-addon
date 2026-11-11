@@ -171,8 +171,37 @@ RUN apt-get update \
 # and that repo's README "Known limitations" section, for the full
 # writeup.
 #
+# Bumped a0217f65 -> 9a48027 (2026-11-10) on a new branch,
+# merge-sound-mode-into-ack-fix: discovered the garage-media dashboard's
+# "Light Show Mode" buttons (media_player.select_sound_mode against
+# media_player.ha_lights_ha_lights_sync) had been erroring with "does not
+# support action media_player.select_sound_mode" since the 55c68f6f bump.
+# Root cause: the Sound Mode feature (52a45628, "Expose color_mode as the
+# player's HA Sound Mode") and the settings-helper two-way sync (cb500ddb)
+# were built on a branch named add-sound-mode-control, branched from
+# 451cc885. The fix-call-service-ack-wedge branch that 55c68f6f/a0217f65
+# came from was ALSO branched from 451cc885, independently - not from
+# cb500ddb - so bumping along that line silently carried none of the
+# Sound Mode / settings-helper code forward, with no error or warning at
+# build or runtime (the entity just quietly never gained
+# PlayerFeature.SELECT_SOUND_MODE). Confirmed live: supported_features on
+# media_player.ha_lights_ha_lights_sync had no SELECT_SOUND_MODE bit, and
+# the input_number.ha_lights_sync_*/input_select.ha_lights_sync_* helpers
+# existed in HA but were not actually being driven by the plugin.
+# merge-sound-mode-into-ack-fix (commit 9a48027) merges cb500ddb onto
+# a0217f65 so both lines of work are present together - conflicts were
+# limited to bridge.py (an import list and stop()'s cleanup block), both
+# sides additive, nothing dropped. _attr_sound_mode_list is built from
+# COLOR_MODES dynamically, so the merge automatically reflects 2fc1951's
+# energetic/auto/strobe cut (sound_mode_list is just smooth/ambient/
+# flashing/pulse) rather than resurrecting the three modes confirmed to
+# freeze the render loop on real hardware. 44 existing unit tests pass
+# unmodified against the merged tree. Needs a real pass against the
+# garage speaker/lights to confirm the Sound Mode buttons actually work
+# end-to-end before this merge branch gets folded back into main.
+#
 RUN pip --python "$VIRTUAL_ENV/bin/python" install --no-cache-dir \
-    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@a0217f6520cb85bd1fb834487314d5ee765a3039" \
+    "ha-lights-sync @ git+https://github.com/zachfeldman/ha-lights-sync.git@9a48027878d99cf0027bac326009216cce734597" \
     music-assistant-plugin-manager
 
 # Same entrypoint as the base image (jemalloc preload for background-thread
